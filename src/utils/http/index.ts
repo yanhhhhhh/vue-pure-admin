@@ -61,6 +61,10 @@ class PureHttp {
   private httpInterceptorsRequest(): void {
     PureHttp.axiosInstance.interceptors.request.use(
       async (config: PureHttpRequestConfig): Promise<any> => {
+        const isProd = import.meta.env.PROD;
+        if (isProd && config.url.startsWith("/api")) {
+          config.baseURL = import.meta.env.VITE_SERVER_URL;
+        }
         // 开启进度条动画
         NProgress.start();
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
@@ -192,3 +196,23 @@ class PureHttp {
 }
 
 export const http = new PureHttp();
+
+export interface Result<T> {
+  code: number;
+  data: T;
+}
+export interface PageResult<T> {
+  code: number;
+  data: {
+    rows: T[];
+    pageIndex: number;
+    pageSize: number;
+    totalPage: number;
+    totalSize: number;
+    hasNext: boolean;
+  };
+}
+export interface PageParams {
+  pageIndex: number;
+  pageSize: number;
+}
